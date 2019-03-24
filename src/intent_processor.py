@@ -20,16 +20,21 @@ def handler(event, context):
     global nlu_engine
     load_latest_model()
  
-    parsing = nlu_engine.parse(event["message"])
+    print(event)
+    body = json.loads(event.get('body', '{}'))
+    parsing = nlu_engine.parse(body.get('message', ''))
    
     # response = {
     #     "statusCode": 200,
     #     "body": json.dumps(parsing)
     # }
+    
     response = parsing
- 
     print(response)
-    return response
+    return {
+        "statusCode": 200,
+        "body": json.dumps(response)
+    }
  
 def load_latest_model():
     global latest_version

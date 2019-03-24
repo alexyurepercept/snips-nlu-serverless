@@ -38,11 +38,19 @@ custom:
 functions:
   botHandler:
     handler: src/intent_processor.handler
+    events:
+      - http:
+          path: processIntent
+          method: post
     environment:
       MODEL_BUCKET_NAME:
         Ref: ModelBucket
   botTrainer:
     handler: src/trainer.handler
+    events:
+      - http:
+          path: train
+          method: post
     environment:
       MODEL_BUCKET_NAME:
         Ref: ModelBucket

@@ -33,7 +33,12 @@ def handler(event, context):
         Key="bot/model.json",
         Body=trained_model,
     )
-    return {"status": "ok"}
+    
+    return {
+        "statusCode": 200,
+        "body": json.dumps({"status": "ok"})
+    }
+    
 
 def load_latest_model():
     global latest_version
