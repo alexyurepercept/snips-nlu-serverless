@@ -1,0 +1,53 @@
+service: snips-nlu-serverless
+
+provider:
+  name: aws
+  runtime: python3.7
+  memorySize: 3008
+  timeout: 300
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListObjects"
+        - "s3:ListBucket"
+      Resource:
+        Fn::GetAtt:
+          - ModelBucket
+          - Arn
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+        - "s3:HeadObject"
+        - "s3:PutObject*"
+      Resource:
+        - Fn::Join:
+            - ""
+            - - Fn::GetAtt:
+                  - ModelBucket
+                  - Arn
+              - /*
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    zip: true
+
+functions:
+  botHandler:
+    handler: src/intent_processor.handler
+    environment:
+      MODEL_BUCKET_NAME:
+        Ref: ModelBucket
+  botTrainer:
+    handler: src/trainer.handler
+    environment:
+      MODEL_BUCKET_NAME:
+        Ref: ModelBucket
+
+resources:
+  Resources:
+    ModelBucket:
+      Type: AWS::S3::Bucket
