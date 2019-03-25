@@ -22,14 +22,7 @@ def handler(event, context):
  
     print(event)
     body = json.loads(event.get('body', '{}'))
-    parsing = nlu_engine.parse(body.get('message', ''))
-   
-    # response = {
-    #     "statusCode": 200,
-    #     "body": json.dumps(parsing)
-    # }
-    
-    response = parsing
+    response = nlu_engine.parse(body.get('message', ''))
     print(response)
     return {
         "statusCode": 200,
@@ -51,10 +44,9 @@ def load_latest_model():
     else:
         raise Exception("Config bucket is undefined")
  
-    load_model(latest_version)
+    download_model(latest_version)
  
- 
-def load_model(model_version):
+def download_model(model_version):
     global bucket_name
     model_file = "{}.json".format(model_version)
     model_file_path = "/tmp/models/{}".format(model_file)
@@ -65,13 +57,12 @@ def load_model(model_version):
         if not os.path.exists('/tmp/models'):
             os.makedirs('/tmp/models')
         s3.meta.client.download_file(bucket_name, "bot/model.json", model_file_path)
- 
-    train_model(model_file_path)
- 
-def train_model(model_file_path):
+
+    load_model(model_file_path)
+
+def load_model(model_file_path):
     global nlu_engine
     print("reading model at {}".format(model_file_path))
     with io.open(model_file_path, 'r+b') as f:
-        # model = json.load(f)
         model = f.read()
         nlu_engine = SnipsNLUEngine.from_byte_array(model)
